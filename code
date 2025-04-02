@@ -1,0 +1,169 @@
+1. LED Blink (2s) - Arduino Uno
+cpp
+Copy
+// Connections: LED anode → Pin 13 (or Pin 9 with 220Ω resistor), cathode → GND
+const int LED_PIN = 13;
+void setup() { pinMode(LED_PIN, OUTPUT); }
+void loop() {
+  digitalWrite(LED_PIN, HIGH); delay(2000);
+  digitalWrite(LED_PIN, LOW);  delay(2000);
+}
+2. LED Blink (2s) - Raspberry Pi
+python
+Copy
+# Connections: LED anode → GPIO18 (Pin 12), cathode → GND via 220Ω resistor
+import RPi.GPIO as GPIO
+import time
+LED_PIN = 18
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(LED_PIN, GPIO.OUT)
+try:
+    while True:
+        GPIO.output(LED_PIN, GPIO.HIGH); time.sleep(2)
+        GPIO.output(LED_PIN, GPIO.LOW);  time.sleep(2)
+except KeyboardInterrupt: GPIO.cleanup()
+3. LM35 Temperature Sensor - Arduino Uno
+cpp
+Copy
+// Connections: LM35 VCC → 5V, OUT → A0, GND → GND
+const int LM35_PIN = A0;
+void setup() { Serial.begin(9600); }
+void loop() {
+  float temp = analogRead(LM35_PIN) * 0.488; // 10mV/°C
+  Serial.print("Temp: "); Serial.print(temp); Serial.println("°C");
+  delay(1000);
+}
+4. SPI Communication - Arduino Uno
+cpp
+Copy
+// Connections: 
+// MOSI → Pin 11, MISO → Pin 12, SCK → Pin 13, SS → Pin 10
+#include <SPI.h>
+const int SS_PIN = 10;
+void setup() {
+  pinMode(SS_PIN, OUTPUT);
+  SPI.begin();
+}
+void loop() {
+  digitalWrite(SS_PIN, LOW);
+  SPI.transfer('A'); // Send data
+  digitalWrite(SS_PIN, HIGH);
+  delay(1000);
+}
+5. I2C Communication - Arduino Uno
+cpp
+Copy
+// Connections: SDA → A4, SCL → A5, 4.7kΩ pull-ups to 5V
+#include <Wire.h>
+void setup() { Wire.begin(); } // Master
+void loop() {
+  Wire.beginTransmission(8); // Slave address = 8
+  Wire.write("Hello");
+  Wire.endTransmission();
+  delay(1000);
+}
+6. Buzzer Control via HC-05 Bluetooth
+cpp
+Copy
+// Connections: 
+// HC-05 TX → Pin 2 (RX), RX → Pin 3 (TX), Buzzer + → Pin 9, - → GND
+#include <SoftwareSerial.h>
+SoftwareSerial BT(2, 3); // RX, TX
+const int BUZZER_PIN = 9;
+void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  BT.begin(9600);
+}
+void loop() {
+  if (BT.available()) {
+    char cmd = BT.read();
+    digitalWrite(BUZZER_PIN, cmd == '1' ? HIGH : LOW);
+  }
+}
+7. UART Communication - Arduino Uno
+cpp
+Copy
+// Connections: USB-to-TTL converter (for PC communication)
+void setup() { Serial.begin(9600); }
+void loop() {
+  if (Serial.available()) {
+    char data = Serial.read();
+    Serial.print("Received: "); Serial.println(data);
+  }
+}
+8. Serial Monitor Output - Arduino Uno
+cpp
+Copy
+void setup() { Serial.begin(9600); }
+void loop() {
+  Serial.println("Hello from Arduino!");
+  delay(1000);
+}
+9. NodeMCU + Blynk LED Control
+cpp
+Copy
+// Connections: LED anode → D4 (GPIO2), cathode → GND
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+char auth[] = "YourAuthToken"; // From Blynk App
+char ssid[] = "YourWiFi";
+char pass[] = "YourPassword";
+void setup() {
+  pinMode(D4, OUTPUT);
+  Blynk.begin(auth, ssid, pass);
+}
+void loop() { Blynk.run(); }
+BLYNK_WRITE(V0) { digitalWrite(D4, param.asInt()); } // Virtual Pin V0
+10. IR Obstacle Sensor - Arduino Uno
+cpp
+Copy
+// Connections: IR VCC → 5V, OUT → Pin 2, GND → GND
+const int IR_PIN = 2;
+void setup() {
+  pinMode(IR_PIN, INPUT);
+  Serial.begin(9600);
+}
+void loop() {
+  if (digitalRead(IR_PIN) == LOW) Serial.println("Obstacle detected!");
+  delay(500);
+}
+11. Ultrasonic (HC-SR04) Obstacle Detection
+cpp
+Copy
+// Connections: 
+// HC-SR04 VCC → 5V, Trig → Pin 9, Echo → Pin 10, GND → GND
+const int TRIG_PIN = 9, ECHO_PIN = 10;
+void setup() {
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  Serial.begin(9600);
+}
+void loop() {
+  digitalWrite(TRIG_PIN, LOW); delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  float distance = pulseIn(ECHO_PIN, HIGH) * 0.034 / 2;
+  Serial.print("Distance: "); Serial.print(distance); Serial.println(" cm");
+  delay(500);
+}
+12. Ultrasonic Distance with Buzzer Alert
+cpp
+Copy
+// Add to #11's setup():
+const int BUZZER_PIN = 8; // Buzzer + → Pin 8, - → GND
+pinMode(BUZZER_PIN, OUTPUT);
+
+// Add to #11's loop():
+if (distance < 20) digitalWrite(BUZZER_PIN, HIGH); 
+else digitalWrite(BUZZER_PIN, LOW);
+Key Notes:
+Power: Sensors (LM35, HC-SR04) typically require 5V.
+
+Resistors:
+
+LED: 220Ω
+
+I2C: 4.7kΩ pull-ups
+
+Bluetooth: HC-05 RX/TX must be cross-connected to Arduino (RX→TX, TX→RX).
